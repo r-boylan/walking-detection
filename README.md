@@ -9,7 +9,7 @@ I wanted to explore can wearable sensor data predict whether a person is walking
 This is treated as a binary classification problem where the target variable is:
   label:FIX_walking: 1 indicates walking, 0 indicates not walking.
 
-#Relevant Features  
+## Relevant Features  
   raw_acc:magnitude_stats:std — measures variability in movement intensity; higher values often indicate more active motion such as walking
   
   raw_acc:magnitude_stats:percentile75 — captures upper-range acceleration values, helping distinguish bursts of movement from steady activity
