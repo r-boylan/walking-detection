@@ -1,7 +1,19 @@
 
 
 # Walking Detection
-Can wearable sensor data predict whether a person is walking?
+
+This project explores whether wearable sensor data contains enough information to distinguish walking from non-walking activity. The dataset consists of observations collected from mobile and smartwatch sensors across multiple users. Each row represents a short segment of sensor readings paired with an activity label.
+
+I wanted to explore can wearable sensor data predict whether a person is walking?
+
+This is treated as a binary classification problem where the target variable is:
+  label:FIX_walking: 1 indicates walking, 0 indicates not walking.
+
+  raw_acc:magnitude_stats:std — measures variability in movement intensity; higher values often indicate more active motion such as walking
+  raw_acc:magnitude_stats:percentile75 — captures upper-range acceleration values, helping distinguish bursts of movement from steady activity
+  raw_acc:magnitude_autocorrelation:normalized_ac — measures how repetitive the signal is over time; walking tends to produce more structured patterns
+  raw_acc:magnitude_autocorrelation:period — estimates the dominant cycle length in movement, useful for detecting rhythmic activity
+  raw_acc:magnitude_spectrum:spectral_entropy — measures how ordered or random the signal is in the frequency domain; lower entropy often indicates more regular motion
 
 <iframe
   src="spectral_entropy_scatter.html"
