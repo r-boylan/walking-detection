@@ -4,7 +4,7 @@ import plotly.express as px
 Can wearable sensor data predict whether a person is walking?
 
 <iframe
-  src="assets/spectral_entropy_scatter.html"
+  src="spectral_entropy_scatter.html"
   width="100%"
   height="600"
   frameborder="0"
