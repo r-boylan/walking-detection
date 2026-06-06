@@ -58,7 +58,7 @@ The plot shows that non-walking observations significantly outnumber walking obs
 This scatter plot shows the relationship between accelerometer spectral entropy and accelerometer variability (raw_acc:magnitude_stats:std). Walking tends to appear at higher values of acceleration variability, while non-walking observations are more concentrated at lower values. However, there is noticeable overlap between the two, indicating that these features are informative but not sufficient on their own for perfectly separating walking from non-walking. This suggests that a combination of multiple sensor features is needed for reliable prediction.
 
 
-#### Interesting Aggregates
+#### -Interesting Aggregates
 
 | user_id                              |   walking_rate |   walking_count |   total_samples |
 |:-------------------------------------|---------------:|----------------:|----------------:|
@@ -129,16 +129,58 @@ This table shows clear variation in walking behavior across individuals, with so
 I think that there are multiple label columns that may be NMAR because the missingness or inconsistency in labeling is likely influenced by the unobserved true activity in the actual behavior, rather than only observable features. Additional data about labeling uncertainty and data collection conditions would be needed to explain the missingness mechanism and potentially reframe it as MAR, like for example label:PHONE_IN_BAG, I think that if there was additional data about the probability that it was in a bag, pocket, hand it would be helpful to turn it into MAR.
 
 ### Hypothesis Testing
+Hypothesis Testing: Walking vs Not Walking
+
+Tested whether there is a statistically significant difference in accelerometer variability between walking and non-walking activities using raw_acc:magnitude_stats:std.
+
+Hypotheses:
+H₀ (null): The mean raw_acc:magnitude_stats:std is the same for walking and non-walking activities.
+H₁ (alternative): The mean raw_acc:magnitude_stats:std is different between walking and non-walking activities.
+
+Decision: Reject H₀ (null)
+
+I used the difference in means between the two groups:
+walking.mean() - not_walking.mean()
+
+A permutation test was used because it makes no assumption about the underlying distribution of the metric and is appropriate for comparing differences between two independent groups.
+
+Significance level:
+α=0.05
+I chose 0.05 since I wanted to detect patterns, and I am willing to have a small amount of false positives.
+
+Method:
+A permutation test with 1000 reshuffles was used. This approach is appropriate because it does not assume normality and remains reliable even when the data are skewed and contain noise like this data.
+
+Results:
+Observed difference in means: 0.1665
+p-value: <0.001
+Since the p-value is below 0.05, we reject the null hypothesis. Walking segments have significantly higher values of accelerometer variability (raw_acc:magnitude_stats:std) than non-walking segments. This suggests that movement intensity is greater and more consistent during walking, making this feature useful for distinguishing between the two classes.
 
 ### Framing a Prediction Problem
+Prediction Problem: Binary classification
+Predict label:FIX_walking (walking vs. not walking)
+
+The response variable is:
+label:FIX_walking
+
+This variable indicates whether the user was walking during a given time window.
+I chose this target because walking is the one of the most common activities. Predicting walking behavior is useful for applications such as activity tracking, fitness monitoring, and behavior-aware reminders etc. 
+
+The model is evaluated using the F1-score.
+This metric was chosen because:
+The dataset is imbalanced (there are significantly more non-walking samples than walking samples)
+Accuracy alone would be misleading, as a model could predict “not walking” most of the time and still achieve high accuracy.
 
 ### Baseline Model
+This project uses a binary classification model (logistic regression) to predict whether a user is walking (label:FIX_walking, 1) or not walking (0) from wearable sensor data. The current model uses a single quantitative feature, raw_acc:magnitude_stats:std, which measures accelerometer variability, and no ordinal or nominal features are included, so no encoding was required. Missing values (if present) are handled using median imputation, and the feature is standardized before training. The model is evaluated using F1-score due to class imbalance, and it achieves an F1-score of 0.426 (accuracy: 0.88, but inflated by the majority class), with strong performance on non-walking (F1 = 0.93) but weaker performance on walking (F1 = 0.43). Overall, this is a reasonable baseline since it shows the feature is informative, but the model is not yet strong enough for reliable walking detection and likely needs additional sensor features to improve performance.
+
 
 ### Final Model
+The final model improves on the baseline model by adding features that better reflect the physics of human motion in the sensor data. In addition to raw_acc:magnitude_stats:std, the model includes percentile75 (captures higher-intensity movement bursts typical of walking), normalized_ac and period from autocorrelation (which capture the repeating rhythmic structure of walking steps), and spectral_entropy (which distinguishes structured walking signals from more random or stationary activity). From the data-generating perspective, walking produces periodic, structured acceleration patterns due to consistent step cycles, while non-walking activities are more irregular or static, so these time and frequency based features are informative for separating the two classes.
+
+The modeling algorithm is logistic regression with class balancing, chosen for interpretability and because the relationship between these engineered signal features and walking probability is approximately linear after scaling. Hyperparameters include class_weight="balanced" and max_iter=1000, and the key tuning step was selecting the decision threshold rather than the default 0.5. A grid search over thresholds from 0.1 to 0.9 was used, and the threshold that maximized F1-score on the validation set was selected as the final model. This improves over the baseline by addressing class imbalance at the decision level rather than relying on a fixed cutoff.
+
+Compared to the baseline model (F1 ≈ 0.426 using only one feature), the final model achieves a higher F1-score (F1 ≈ 0.474) because it uses multiple features that capture different parts of the walking pattern instead of relying on just one signal.
 
 ### Fairness Analysis
-
-
-
-
-
+I compared model precision between two groups of users: Group X (high_walk), defined as users whose average walking rate is above or equal to the median, and Group Y (low_walk), defined as users below the median. I used precision as the evaluation metric because it measures how often the model’s predicted “walking” labels are actually correct within each group, which is useful for checking whether the model behaves consistently across different users. The null hypothesis states that the model’s precision is the same for both groups, while the alternative hypothesis states that the precision is different. I used the difference in precision (high_walk − low_walk) as the test statistic, along with a permutation test with 1000 reshuffles to generate a null distribution, using a significance level of 0.05. The observed difference in precision was about 0.228, with a p-value of 0.0, so I reject the null hypothesis. This provides strong evidence that the model performs differently across the two user groups, with higher precision for high_walk users than low_walk users.
