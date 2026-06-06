@@ -135,6 +135,7 @@ Tested whether there is a statistically significant difference in accelerometer 
 
 Hypotheses:
 H₀ (null): The mean raw_acc:magnitude_stats:std is the same for walking and non-walking activities.
+
 H₁ (alternative): The mean raw_acc:magnitude_stats:std is different between walking and non-walking activities.
 
 Decision: Reject H₀ (null)
