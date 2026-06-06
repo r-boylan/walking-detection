@@ -135,6 +135,8 @@ I think that there are multiple label columns that may be NMAR because the missi
   frameborder="0"
 ></iframe>
 
+The permutation test suggests that the missingness of location:max_speed depends on raw_acc:magnitude_stats:mean. The observed difference in means between rows where location:max_speed is missing and not missing falls far to the left of the permutation distribution, which is centered around 0 under the null hypothesis of no relationship. Because the observed statistic is much more extreme than what would be expected by random chance, we would reject the null hypothesis and conclude that the missingness is likely related to raw_acc:magnitude_stats:mean. This suggests the missingness is not completely random and may instead be MAR, since it appears associated with this variable.
+
 ### Hypothesis Testing
 Hypothesis Testing: Walking vs Not Walking
 
