@@ -37,8 +37,6 @@ This is treated as a binary classification problem where the target variable is:
 
   I removed the irrelevant label columns and kept label:FIX_walking as it is my target to predict. 
 
-### Assessment of Missingness
-
 <iframe
   src="class_distribution_walking_not_walking.html"
   width="100%"
@@ -126,7 +124,16 @@ This scatter plot shows the relationship between accelerometer spectral entropy 
 
 This table shows clear variation in walking behavior across individuals, with some users spending a substantially higher proportion of their recorded time walking than others. The spread in walking rates suggests individual differences in walking patterns. This is important because the model has to predict walking across different types of individuals.  
 
+### Assessment of Missingness
+
 I think that there are multiple label columns that may be NMAR because the missingness or inconsistency in labeling is likely influenced by the unobserved true activity in the actual behavior, rather than only observable features. Additional data about labeling uncertainty and data collection conditions would be needed to explain the missingness mechanism and potentially reframe it as MAR, like for example label:PHONE_IN_BAG, I think that if there was additional data about the probability that it was in a bag, pocket, hand it would be helpful to turn it into MAR.
+
+<iframe
+  src="permutation_test.html"
+  width="100%"
+  height="600"
+  frameborder="0"
+></iframe>
 
 ### Hypothesis Testing
 Hypothesis Testing: Walking vs Not Walking
